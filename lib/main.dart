@@ -62,11 +62,15 @@ class _MyHomePageState extends State<MyHomePage> {
           onStepContinue: () => setState(() => currentStepIndex++),
           onStepTapped: (int index) => setState(() => currentStepIndex = index),
           steps: questions
-              .map((String q) => Step(
-                    title: Text(
-                      q,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 3,
+              .map((String question) => Step(
+                    title: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width - 84,
+                      ),
+                      child: Text(
+                        question,
+                        softWrap: true,
+                      ),
                     ),
                     content: QuestionWidget(),
                   ))
