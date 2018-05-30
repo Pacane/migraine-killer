@@ -1,16 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) => MaterialApp(
         title: 'Migraine Killer',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: MyHomePage(title: 'STAI-POMS'),
+        home: QuizProvider(child: MyHomePage(title: 'STAI-POMS')),
       );
 }
 
@@ -26,74 +28,101 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int currentStepIndex = 0;
-
-  List<String> questions = [
-    "Je me sens calme.",
-    "Je me sens en sécurité.",
-    "Je suis tendu(e).",
-    "Je me sens surmené(e)",
-    "Je me sens tranquille.",
-    "Je me sens bouleversé.",
-    "Je suis préoccupé(e) actuellement par des malheurs possibles.",
-    "Je me sens comblé(e).",
-    "Je me sens effrayé(e).",
-    "Je me sens à l’aise.",
-    "Je me sens sûr de moi.",
-    "Je me sens nerveux(se).",
-    "Je suis affolé(e).",
-    "Je me sens indécis(e).",
-    "Je suis détendu(e).",
-    "Je me sens satisfait(e).",
-    "Je suis préoccupé(e).",
-    "Je me sens tout mêlé(e).",
-    "Je sens que j’ai les nerfs solides.",
-    "Je me sens bien.",
-  ];
+  TabController controller;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: Stepper(
-          currentStep: currentStepIndex,
-          onStepContinue: () => setState(() => currentStepIndex++),
-          onStepTapped: (int index) => setState(() => currentStepIndex = index),
-          steps: questions
-              .map((String question) => Step(
-                    title: Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width - 84,
-                      ),
-                      child: Text(
-                        question,
-                        softWrap: true,
-                      ),
-                    ),
-                    content: QuestionWidget(),
-                  ))
-              .toList(),
-        ),
-      );
+  Widget build(BuildContext context) {
+    final quiz = QuizProvider.of(context);
+    controller = new TabController(
+      length: quiz.amountOfQuestions,
+      vsync: this,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: StreamBuilder<List<AnswerUpdate>>(
+        initialData: [],
+        stream: quiz.answers,
+        builder: (context, snapshot) => TabBarView(
+              controller: controller,
+              children: snapshot.data
+                  .map((update) => Column(
+                        children: <Widget>[
+                          QuestionWidget(update.question, update.answer),
+                          Container(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: RaisedButton(
+                                    child: Text('PRÉCÉDENT'),
+                                    onPressed: () {
+                                      if (controller.index > 0) {
+                                        controller.animateTo(
+                                            controller.index - 1,
+                                            duration:
+                                                Duration(milliseconds: 100));
+                                      }
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: RaisedButton(
+                                    child: Text('SUIVANT'),
+                                    onPressed: () {
+                                      if (controller.index <
+                                          snapshot.data.length - 1) {
+                                        controller.animateTo(
+                                            controller.index + 1,
+                                            duration:
+                                                Duration(milliseconds: 100));
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ))
+                  .toList(),
+            ),
+      ),
+    );
+  }
 }
 
-class QuestionWidget extends StatefulWidget {
-  QuestionWidget();
+class QuestionWidget extends StatelessWidget {
+  final String question;
+  final int answer;
+
+  QuestionWidget(this.question, this.answer);
 
   @override
-  State<StatefulWidget> createState() => QuestionWidgetState();
-}
+  Widget build(BuildContext context) {
+    final quiz = QuizProvider.of(context);
 
-class QuestionWidgetState extends State<QuestionWidget> {
-  int answer;
+    void updateAnswer(int value) =>
+        quiz.answerSink.add(new AnswerUpdate(question, value));
 
-  QuestionWidgetState();
-
-  @override
-  Widget build(BuildContext context) => Column(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
         children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              question,
+              style: Theme.of(context).textTheme.title,
+            ),
+          ),
           new RadioListTile(
             title: Text(
               'Pas du tout',
@@ -101,42 +130,106 @@ class QuestionWidgetState extends State<QuestionWidget> {
             ),
             groupValue: answer,
             value: 1,
-            onChanged: (newValue) {
-              setState(() {
-                answer = newValue;
-              });
-            },
+            onChanged: updateAnswer,
           ),
           RadioListTile<int>(
             title: Text('Un peu'),
             groupValue: answer,
             value: 2,
-            onChanged: (newValue) {
-              setState(() {
-                answer = newValue;
-              });
-            },
+            onChanged: updateAnswer,
           ),
           RadioListTile<int>(
             title: Text('Modérément'),
             groupValue: answer,
             value: 3,
-            onChanged: (newValue) {
-              setState(() {
-                answer = newValue;
-              });
-            },
+            onChanged: updateAnswer,
           ),
           RadioListTile<int>(
             title: Text('Beaucoup'),
             groupValue: answer,
             value: 4,
-            onChanged: (newValue) {
-              setState(() {
-                answer = newValue;
-              });
-            },
+            onChanged: updateAnswer,
           ),
         ],
-      );
+      ),
+    );
+  }
+}
+
+class AnswerUpdate {
+  final String question;
+  final int answer;
+
+  AnswerUpdate(this.question, this.answer);
+}
+
+class QuizState {
+  Map<String, int> _questions = {
+    "Je me sens calme.": null,
+    "Je me sens en sécurité.": null,
+    "Je suis tendu(e).": null,
+    "Je me sens surmené(e)": null,
+    "Je me sens tranquille.": null,
+    "Je me sens bouleversé.": null,
+    "Je suis préoccupé(e) actuellement par des malheurs possibles.": null,
+    "Je me sens comblé(e).": null,
+    "Je me sens effrayé(e).": null,
+    "Je me sens à l’aise.": null,
+    "Je me sens sûr de moi.": null,
+    "Je me sens nerveux(se).": null,
+    "Je suis affolé(e).": null,
+    "Je me sens indécis(e).": null,
+    "Je suis détendu(e).": null,
+    "Je me sens satisfait(e).": null,
+    "Je suis préoccupé(e).": null,
+    "Je me sens tout mêlé(e).": null,
+    "Je sens que j’ai les nerfs solides.": null,
+    "Je me sens bien.": null,
+  };
+
+  List<AnswerUpdate> get answers =>
+      _questions.keys.map((q) => new AnswerUpdate(q, _questions[q])).toList();
+
+  void updateAnswer(String question, int answer) =>
+      _questions[question] = answer;
+}
+
+class QuizBloc {
+  final QuizState _quiz;
+
+  BehaviorSubject<List<AnswerUpdate>> answers;
+
+  int get amountOfQuestions => _quiz.answers.length;
+
+  Sink<AnswerUpdate> get answerSink => _controller.sink;
+
+  // ignore: close_sinks
+  StreamController<AnswerUpdate> _controller = StreamController();
+
+  QuizBloc() : _quiz = new QuizState() {
+    answers = BehaviorSubject<List<AnswerUpdate>>(seedValue: _quiz.answers);
+
+    _controller.stream.listen((update) {
+      _quiz.updateAnswer(update.question, update.answer);
+      answers.add(_quiz.answers);
+    });
+  }
+}
+
+class QuizProvider extends InheritedWidget {
+  final QuizBloc quizBloc;
+
+  QuizProvider({
+    Key key,
+    QuizBloc quizBloc,
+    Widget child,
+  })  : quizBloc = quizBloc ?? QuizBloc(),
+        super(key: key, child: child);
+
+  @override
+  bool updateShouldNotify(InheritedWidget oldWidget) => true;
+
+  static QuizBloc of(BuildContext context) =>
+      (context.inheritFromWidgetOfExactType(QuizProvider) as QuizProvider)
+          .quizBloc;
 }
