@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 
 void main() => runApp(new MyApp());
 
@@ -165,41 +165,65 @@ class AnswerUpdate {
 
 class QuizState {
   Map<String, int> _questions = {
-    "Je me sens calme.": null,
-    "Je me sens en sécurité.": null,
-    "Je suis tendu(e).": null,
+    "Je me sens calme": null,
+    "Je me sens en sécurité": null,
+    "Je suis tendu(e)": null,
     "Je me sens surmené(e)": null,
-    "Je me sens tranquille.": null,
-    "Je me sens bouleversé.": null,
-    "Je suis préoccupé(e) actuellement par des malheurs possibles.": null,
-    "Je me sens comblé(e).": null,
-    "Je me sens effrayé(e).": null,
-    "Je me sens à l’aise.": null,
-    "Je me sens sûr de moi.": null,
-    "Je me sens nerveux(se).": null,
-    "Je suis affolé(e).": null,
-    "Je me sens indécis(e).": null,
-    "Je suis détendu(e).": null,
-    "Je me sens satisfait(e).": null,
-    "Je suis préoccupé(e).": null,
-    "Je me sens tout mêlé(e).": null,
-    "Je sens que j’ai les nerfs solides.": null,
-    "Je me sens bien.": null,
+    "Je me sens tranquille": null,
+    "Je me sens bouleversé": null,
+    "Je suis préoccupé(e) actuellement par des malheurs possibles": null,
+    "Je me sens comblé(e)": null,
+    "Je me sens effrayé(e)": null,
+    "Je me sens à l’aise": null,
+    "Je me sens sûr de moi": null,
+    "Je me sens nerveux(se)": null,
+    "Je suis affolé(e)": null,
+    "Je me sens indécis(e)": null,
+    "Je suis détendu(e)": null,
+    "Je me sens satisfait(e)": null,
+    "Je suis préoccupé(e)": null,
+    "Je me sens tout mêlé(e)": null,
+    "Je sens que j’ai les nerfs solides": null,
+    "Je me sens bien": null,
   };
 
-  List<AnswerUpdate> get answers =>
-      _questions.keys.map((q) => new AnswerUpdate(q, _questions[q])).toList();
+  int get amountOfQuestions => _questions.length;
 
-  void updateAnswer(String question, int answer) =>
-      _questions[question] = answer;
+  Stream<List<AnswerUpdate>> get answers => Firestore.instance
+          .collection('stai-poms')
+          .document(nowDate())
+          .snapshots()
+          .map((DocumentSnapshot s) {
+        if (s.data == null) {
+          return _questions.keys.map((q) => AnswerUpdate(q, null)).toList();
+        }
+
+        return s.data.keys.map((q) => AnswerUpdate(q, s.data[q])).toList();
+      });
+
+  void updateAnswer(String question, int answer) {
+    final collection = Firestore.instance.collection('stai-poms');
+    String iso8601string = nowDate();
+
+    _questions[question] = answer;
+
+    collection.document(iso8601string).setData(_questions, merge: true);
+  }
+
+  String nowDate() {
+    final now = DateTime.now();
+    var iso8601string =
+        DateTime(now.year, now.month, now.day).toIso8601String();
+    return iso8601string;
+  }
 }
 
 class QuizBloc {
   final QuizState _quiz;
 
-  BehaviorSubject<List<AnswerUpdate>> answers;
+  int get amountOfQuestions => _quiz.amountOfQuestions;
 
-  int get amountOfQuestions => _quiz.answers.length;
+  Stream<List<AnswerUpdate>> get answers => _quiz.answers;
 
   Sink<AnswerUpdate> get answerSink => _controller.sink;
 
@@ -207,11 +231,8 @@ class QuizBloc {
   StreamController<AnswerUpdate> _controller = StreamController();
 
   QuizBloc() : _quiz = new QuizState() {
-    answers = BehaviorSubject<List<AnswerUpdate>>(seedValue: _quiz.answers);
-
     _controller.stream.listen((update) {
       _quiz.updateAnswer(update.question, update.answer);
-      answers.add(_quiz.answers);
     });
   }
 }
