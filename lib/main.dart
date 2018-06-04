@@ -43,6 +43,24 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.calendar_today),
+            onPressed: () async {
+              final newDate = await showDatePicker(
+                  context: context,
+                  initialDate: quiz.currentDate,
+                  firstDate: quiz.currentDate.subtract(Duration(days: 30)),
+                  lastDate: quiz.currentDate.add(Duration(days: 30)));
+
+              if (newDate != null) {
+                setState(() {
+                  quiz.currentDate = newDate;
+                });
+              }
+            },
+          )
+        ],
       ),
       body: StreamBuilder<List<AnswerUpdate>>(
         initialData: [],
@@ -164,6 +182,8 @@ class AnswerUpdate {
 }
 
 class QuizState {
+  DateTime _currentDate = DateTime.now();
+
   Map<String, int> _questions = {
     "Je me sens calme": null,
     "Je me sens en sécurité": null,
@@ -191,7 +211,7 @@ class QuizState {
 
   Stream<List<AnswerUpdate>> get answers => Firestore.instance
           .collection('stai-poms')
-          .document(nowDate())
+          .document(dateString(_currentDate))
           .snapshots()
           .map((DocumentSnapshot s) {
         if (s.data == null) {
@@ -203,17 +223,20 @@ class QuizState {
 
   void updateAnswer(String question, int answer) {
     final collection = Firestore.instance.collection('stai-poms');
-    String iso8601string = nowDate();
+    String iso8601string = dateString(_currentDate);
 
     _questions[question] = answer;
 
     collection.document(iso8601string).setData(_questions, merge: true);
   }
 
-  String nowDate() {
-    final now = DateTime.now();
+  void updateDate(DateTime date) {
+    _currentDate = date;
+  }
+
+  String dateString(DateTime date) {
     var iso8601string =
-        DateTime(now.year, now.month, now.day).toIso8601String();
+        DateTime(date.year, date.month, date.day).toIso8601String();
     return iso8601string;
   }
 }
@@ -223,15 +246,19 @@ class QuizBloc {
 
   int get amountOfQuestions => _quiz.amountOfQuestions;
 
+  DateTime get currentDate => _quiz._currentDate;
+
+  set currentDate(DateTime date) => _quiz.updateDate(date);
+
   Stream<List<AnswerUpdate>> get answers => _quiz.answers;
 
-  Sink<AnswerUpdate> get answerSink => _controller.sink;
+  Sink<AnswerUpdate> get answerSink => _answersController.sink;
 
   // ignore: close_sinks
-  StreamController<AnswerUpdate> _controller = StreamController();
+  StreamController<AnswerUpdate> _answersController = StreamController();
 
   QuizBloc() : _quiz = new QuizState() {
-    _controller.stream.listen((update) {
+    _answersController.stream.listen((update) {
       _quiz.updateAnswer(update.question, update.answer);
     });
   }
