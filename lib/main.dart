@@ -65,53 +65,57 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       body: StreamBuilder<List<AnswerUpdate>>(
         initialData: [],
         stream: quiz.answers,
-        builder: (context, snapshot) => TabBarView(
-              controller: controller,
-              children: snapshot.data
-                  .map((update) => Column(
-                        children: <Widget>[
-                          QuestionWidget(update.question, update.answer),
-                          Container(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RaisedButton(
-                                    child: Text('PRÉCÉDENT'),
-                                    onPressed: () {
-                                      if (controller.index > 0) {
-                                        controller.animateTo(
-                                            controller.index - 1,
-                                            duration:
-                                                Duration(milliseconds: 100));
-                                      }
-                                    },
-                                  ),
+        builder: (context, snapshot) {
+          var sortedQuestions = snapshot.data
+            ..sort((a1, a2) => quiz
+                .indexOfQuestion(a1.question)
+                .compareTo(quiz.indexOfQuestion(a2.question)));
+          return TabBarView(
+            controller: controller,
+            children: sortedQuestions
+                .map((update) => Column(
+                      children: <Widget>[
+                        QuestionWidget(update.question, update.answer),
+                        Container(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: RaisedButton(
+                                  child: Text('PRÉCÉDENT'),
+                                  onPressed: () {
+                                    if (controller.index > 0) {
+                                      controller.animateTo(controller.index - 1,
+                                          duration:
+                                              Duration(milliseconds: 100));
+                                    }
+                                  },
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: RaisedButton(
-                                    child: Text('SUIVANT'),
-                                    onPressed: () {
-                                      if (controller.index <
-                                          snapshot.data.length - 1) {
-                                        controller.animateTo(
-                                            controller.index + 1,
-                                            duration:
-                                                Duration(milliseconds: 100));
-                                      }
-                                    },
-                                  ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: RaisedButton(
+                                  child: Text('SUIVANT'),
+                                  onPressed: () {
+                                    if (controller.index <
+                                        sortedQuestions.length - 1) {
+                                      controller.animateTo(controller.index + 1,
+                                          duration:
+                                              Duration(milliseconds: 100));
+                                    }
+                                  },
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ))
-                  .toList(),
-            ),
+                        ),
+                      ],
+                    ))
+                .toList(),
+          );
+        },
       ),
     );
   }
@@ -130,6 +134,8 @@ class QuestionWidget extends StatelessWidget {
     void updateAnswer(int value) =>
         quiz.answerSink.add(new AnswerUpdate(question, value));
 
+    int questionIndex = quiz._quiz._questions.keys.toList().indexOf(question);
+
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -137,7 +143,7 @@ class QuestionWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              question,
+              "$questionIndex/${quiz.amountOfQuestions}. $question",
               style: Theme.of(context).textTheme.title,
             ),
           ),
@@ -262,6 +268,9 @@ class QuizBloc {
       _quiz.updateAnswer(update.question, update.answer);
     });
   }
+
+  int indexOfQuestion(String question) =>
+      _quiz._questions.keys.toList().indexOf(question);
 }
 
 class QuizProvider extends InheritedWidget {
