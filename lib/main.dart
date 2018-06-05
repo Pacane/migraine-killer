@@ -143,7 +143,7 @@ class QuestionWidget extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "$questionIndex/${quiz.amountOfQuestions}. $question",
+              "${questionIndex + 1}/${quiz.amountOfQuestions}. $question",
               style: Theme.of(context).textTheme.title,
             ),
           ),
