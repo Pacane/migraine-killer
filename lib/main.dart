@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:migraine_killer/bloc.dart';
-import 'package:migraine_killer/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:migraine_killer/pages.dart';
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:migraine_killer/pages.dart';
 import 'package:migraine_killer/routing_assistant.dart';
 
 class MenuPage extends StatelessWidget {
