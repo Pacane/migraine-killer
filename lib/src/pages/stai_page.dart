@@ -90,22 +90,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
                 .compareTo(quiz.indexOfQuestion(a2.question)));
 
           return sortedQuestions.isEmpty
-              ? Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.highlight_off,
-                        size: 128.0,
-                      ),
-                      Text(
-                        'Oh no!',
-                        style: TextStyle(fontSize: 48.0),
-                      ),
-                    ],
-                  ),
-                )
+              ? Center(child: CircularProgressIndicator())
               : TabBarView(
                   controller: controller,
                   children: sortedQuestions
