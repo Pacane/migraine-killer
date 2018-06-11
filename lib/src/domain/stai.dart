@@ -20,10 +20,3 @@ List<String> questions = [
   "Je sens que j’ai les nerfs solides",
   "Je me sens bien",
 ];
-
-class AnswerUpdate {
-  final String question;
-  final int answer;
-
-  AnswerUpdate(this.question, this.answer);
-}

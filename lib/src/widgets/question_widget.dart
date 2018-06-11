@@ -2,20 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:migraine_killer/bloc.dart';
 import 'package:migraine_killer/domain.dart';
 
-class QuestionWidget extends StatelessWidget {
+class QuestionWidget<T extends Quiz> extends StatelessWidget {
   final String question;
   final int answer;
+  final Function providerFactory;
 
-  QuestionWidget(this.question, this.answer);
+  QuestionWidget(this.question, this.answer, this.providerFactory);
 
   @override
   Widget build(BuildContext context) {
-    final quiz = STAIProvider.of(context);
+    final quiz = providerFactory(context);
 
     void updateAnswer(int value) =>
         quiz.answerSink.add(AnswerUpdate(question, value));
 
-    int questionIndex = questions.indexOf(question);
+    int questionIndex = quiz.questions.indexOf(question);
 
     return Padding(
       padding: const EdgeInsets.all(8.0),

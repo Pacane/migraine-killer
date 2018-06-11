@@ -4,12 +4,12 @@ import 'package:migraine_killer/bloc.dart';
 import 'package:migraine_killer/domain.dart';
 import 'package:migraine_killer/widgets.dart';
 
-class STAIPage extends StatefulWidget {
+class POMSPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => STAIState();
+  State<StatefulWidget> createState() => POMSState();
 }
 
-class STAIState extends State<STAIPage> with TickerProviderStateMixin {
+class POMSState extends State<POMSPage> with TickerProviderStateMixin {
   int currentStepIndex = 0;
   TabController controller;
 
@@ -35,7 +35,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
               child: RaisedButton(
                 child: Text('SUIVANT'),
                 onPressed: () {
-                  if (controller.index < staiQuestions.length - 1) {
+                  if (controller.index < pomsQuestions.length - 1) {
                     controller.animateTo(controller.index + 1,
                         duration: Duration(milliseconds: 100));
                   }
@@ -48,7 +48,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final quiz = STAIProvider.of(context);
+    final quiz = POMSProvider.of(context);
     controller = new TabController(
       length: quiz.amountOfQuestions,
       vsync: this,
@@ -56,7 +56,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('STAI'),
+        title: Text('POMS-SM'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.calendar_today),
@@ -114,7 +114,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
                               QuestionWidget(
                                 update.question,
                                 update.answer,
-                                (context) => STAIProvider.of(context),
+                                (context) => POMSProvider.of(context),
                               ),
                               quizNavigationWidget,
                             ],

@@ -8,6 +8,6 @@ class RoutingAssistant {
       );
 
   static MaterialPageRoute pomsPage() => MaterialPageRoute(
-        builder: (_) => STAIPage(), // TODO POMS page
+        builder: (_) => POMSProvider(child: POMSPage()),
       );
 }
