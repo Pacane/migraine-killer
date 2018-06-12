@@ -1,11 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:migraine_killer/domain.dart';
 import 'quiz_bloc.dart';
 
 class STAIState extends QuizState {
-  DateTime currentDate = DateTime.now();
   static const String _collectionName = 'stai';
 
   STAIState() : super(staiQuestions, _collectionName);
@@ -28,31 +25,8 @@ class STAIState extends QuizState {
   }
 }
 
-class STAIBloc {
-  final STAIState _quiz;
-
-  int get amountOfQuestions => _quiz.amountOfQuestions;
-
-  List<String> get questions => _quiz.questions;
-
-  DateTime get currentDate => _quiz.currentDate;
-
-  set currentDate(DateTime date) => _quiz.updateDate(date);
-
-  Stream<List<AnswerUpdate>> get answers => _quiz.answers;
-
-  Sink<AnswerUpdate> get answerSink => _answersController.sink;
-
-  // ignore: close_sinks
-  StreamController<AnswerUpdate> _answersController = StreamController();
-
-  STAIBloc() : _quiz = new STAIState() {
-    _answersController.stream.listen((update) {
-      _quiz.updateAnswer(update.question, update.answer);
-    });
-  }
-
-  int indexOfQuestion(String question) => questions.indexOf(question);
+class STAIBloc extends QuizBloc {
+  STAIBloc() : super(STAIState());
 }
 
 class STAIProvider extends InheritedWidget {

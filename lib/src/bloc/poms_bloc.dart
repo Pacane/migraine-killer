@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:migraine_killer/domain.dart';
 import 'quiz_bloc.dart';
@@ -9,43 +7,14 @@ class POMSState extends QuizState {
 
   POMSState() : super(pomsQuestions, _collectionName);
 
-  num get score {
-    return result.entries.fold(0, (acc, entry) => acc + entry.value) /
-        result.entries.length;
-  }
-
-  String dateString(DateTime date) {
-    var iso8601string =
-        DateTime(date.year, date.month, date.day).toIso8601String();
-    return iso8601string;
-  }
+  num get score => result.entries.any((entry) => entry.value == null)
+      ? -1
+      : result.entries.fold(0, (acc, entry) => acc + entry.value) /
+          result.entries.length;
 }
 
-class POMSBloc {
-  final POMSState _quiz;
-
-  int get amountOfQuestions => _quiz.amountOfQuestions;
-
-  DateTime get currentDate => _quiz.currentDate;
-
-  List<String> get questions => _quiz.questions;
-
-  set currentDate(DateTime date) => _quiz.updateDate(date);
-
-  Stream<List<AnswerUpdate>> get answers => _quiz.answers;
-
-  Sink<AnswerUpdate> get answerSink => _answersController.sink;
-
-  // ignore: close_sinks
-  StreamController<AnswerUpdate> _answersController = StreamController();
-
-  POMSBloc() : _quiz = new POMSState() {
-    _answersController.stream.listen((update) {
-      _quiz.updateAnswer(update.question, update.answer);
-    });
-  }
-
-  int indexOfQuestion(String question) => questions.indexOf(question);
+class POMSBloc extends QuizBloc {
+  POMSBloc() : super(POMSState());
 }
 
 class POMSProvider extends InheritedWidget {

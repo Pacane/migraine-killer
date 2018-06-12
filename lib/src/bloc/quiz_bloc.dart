@@ -51,3 +51,30 @@ abstract class QuizState {
     return iso8601string;
   }
 }
+
+class QuizBloc {
+  final QuizState _quiz;
+
+  int get amountOfQuestions => _quiz.amountOfQuestions;
+
+  List<String> get questions => _quiz.questions;
+
+  DateTime get currentDate => _quiz.currentDate;
+
+  set currentDate(DateTime date) => _quiz.updateDate(date);
+
+  Stream<List<AnswerUpdate>> get answers => _quiz.answers;
+
+  Sink<AnswerUpdate> get answerSink => _answersController.sink;
+
+  // ignore: close_sinks
+  StreamController<AnswerUpdate> _answersController = StreamController();
+
+  QuizBloc(QuizState quiz) : _quiz = quiz {
+    _answersController.stream.listen((update) {
+      _quiz.updateAnswer(update.question, update.answer);
+    });
+  }
+
+  int indexOfQuestion(String question) => questions.indexOf(question);
+}

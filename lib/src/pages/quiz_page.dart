@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:migraine_killer/bloc.dart';
 import 'package:migraine_killer/domain.dart';
 import 'package:migraine_killer/widgets.dart';
 
-class STAIPage extends StatefulWidget {
+class QuizPage extends StatefulWidget {
+  final Function providerFactory;
+  final String title;
+
+  QuizPage(
+    this.providerFactory,
+    this.title,
+  );
+
   @override
-  State<StatefulWidget> createState() => STAIState();
+  State<StatefulWidget> createState() => QuizState();
 }
 
-class STAIState extends State<STAIPage> with TickerProviderStateMixin {
+class QuizState extends State<QuizPage> with TickerProviderStateMixin {
   int currentStepIndex = 0;
   TabController controller;
 
@@ -48,7 +55,8 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final quiz = STAIProvider.of(context);
+    final quiz = widget.providerFactory(context);
+
     controller = new TabController(
       length: quiz.amountOfQuestions,
       vsync: this,
@@ -56,7 +64,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('STAI'),
+        title: Text(widget.title),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.calendar_today),
@@ -99,7 +107,7 @@ class STAIState extends State<STAIPage> with TickerProviderStateMixin {
                               QuestionWidget(
                                 update.question,
                                 update.answer,
-                                (context) => STAIProvider.of(context),
+                                widget.providerFactory,
                               ),
                               quizNavigationWidget,
                             ],
