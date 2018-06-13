@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "44106087305",
+    "firebase_url": "https://migraine-killer.firebaseio.com",
+    "project_id": "migraine-killer",
+    "storage_bucket": "migraine-killer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44106087305:android:771214eb8ca84a71",
+        "android_client_info": {
+          "package_name": "ca.migrainekiller.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "44106087305-g69qekalku0mj29sp4ul1ami58cv9sbv.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "44106087305-g69qekalku0mj29sp4ul1ami58cv9sbv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiAsEAEw_Ptsg5rLKfkZilXIsDZQvNlmM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
