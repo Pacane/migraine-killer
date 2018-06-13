@@ -25,14 +25,15 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    _scheduleReminderNotification();
+    _scheduleReminderNotification(Time(9));
+    _scheduleReminderNotification(Time(22));
   }
 
-  Future _scheduleReminderNotification() async {
+  Future _scheduleReminderNotification(Time time) async {
     var androidPlatformChannelSpecifics = new AndroidNotificationDetails(
       'mk_001',
-      'reminder_night',
-      'quiz reminder night',
+      'reminder',
+      'quiz reminder',
       icon: 'think_36',
       largeIcon: 'think_48',
     );
@@ -43,7 +44,7 @@ class MyAppState extends State<MyApp> {
       0,
       'Rappel quotidien',
       "N'oubliez-pas de remplir vos questionnaires aujourd'hui!",
-      Time(22),
+      time,
       platformChannelSpecifics,
     );
   }
